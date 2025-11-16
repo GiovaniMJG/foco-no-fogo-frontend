@@ -1,0 +1,39 @@
+.estat-card {
+ background: var(--card-color);
+ padding: 18px;
+ border-radius: 12px;
+ box-shadow: 0 0 12px rgba(255, 140, 0, 0.25);
+}
+.estat-card h3 {
+ color: var(--accent);
+ margin-top: 0;
+ margin-bottom: 14px;
+}
+.estat-vazio {
+ color: var(--muted);
+ text-align: center;
+ font-size: 0.9rem;
+}
+.estat-grid {
+ display: flex;
+ justify-content: space-between;
+ gap: 16px;
+}
+.estat-item {
+ flex: 1;
+ background: #2a2a2a;
+ padding: 12px;
+ border-radius: 10px;
+ text-align: center;
+}
+.estat-label {
+ font-size: 0.85rem;
+ color: var(--muted);
+}
+.estat-valor {
+ margin-top: 4px;
+ display: block;
+ color: var(--accent);
+ font-size: 1.4rem;
+ font-weight: bold;
+}
