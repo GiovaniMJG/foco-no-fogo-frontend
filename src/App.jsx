@@ -1,6 +1,8 @@
 // frontend/src/App.jsx
-import { useEffect, useState } from "react";
 import "./App.css";
+
+import { useDenuncias } from "./hooks/useDenuncias";
+import { useState, useEffect } from "react";
 
 import FormularioDenuncia from "./components/FormularioDenuncia";
 import FiltroDenuncias from "./components/FiltroDenuncias";
@@ -10,36 +12,26 @@ import GraficoDenuncias from "./components/GraficoDenuncias";
 import GraficoTemporal from "./components/GraficoTemporal";
 
 function App() {
-  const [denuncias, setDenuncias] = useState([]);
+  // Busca denúncias automaticamente do backend render
+  const denuncias = useDenuncias();
+
+  // Estado para filtros
   const [denunciasFiltradas, setDenunciasFiltradas] = useState([]);
   const [filtros, setFiltros] = useState({ tipos: [], bairros: [] });
-  const [carregandoInicial, setCarregandoInicial] = useState(true);
   const [carregandoFiltro, setCarregandoFiltro] = useState(false);
 
-  // Carrega denúncias na primeira montagem
+  // Sempre que denuncias mudar → atualiza filtradas
   useEffect(() => {
-    async function carregar() {
-      try {
-        const res = await fetch("http://localhost:5000/api/denuncias");
-        const data = await res.json();
-        setDenuncias(data);
-        setDenunciasFiltradas(data);
-      } catch (err) {
-        console.error("Erro ao carregar denúncias:", err);
-      } finally {
-        setCarregandoInicial(false);
-      }
+    if (denuncias.length > 0) {
+      setDenunciasFiltradas(denuncias);
     }
+  }, [denuncias]);
 
-    carregar();
-  }, []);
-
-  // Aplicar filtros localmente
+  // Aplicar filtros locais
   const aplicarFiltros = ({ tipos, bairros }) => {
     setCarregandoFiltro(true);
     setFiltros({ tipos, bairros });
 
-    // Simples filtro local – se quiser depois dá pra mover para o backend
     let filtradas = [...denuncias];
 
     if (tipos && tipos.length > 0) {
@@ -52,35 +44,20 @@ function App() {
 
     setDenunciasFiltradas(filtradas);
 
-    // Pequeno delay só pra dar sensação de “aplicando filtro” no overlay
+    // Delay visual
     setTimeout(() => {
       setCarregandoFiltro(false);
-    }, 400);
+    }, 300);
   };
 
-  // Quando criar nova denúncia pelo formulário
+  // Quando uma denúncia é criada
   const handleDenunciaCriada = (nova) => {
-    // adiciona no início da lista
-    const atualizadas = [nova, ...denuncias];
-    setDenuncias(atualizadas);
-
-    // re-aplica filtros atuais em cima da nova lista
-    let filtradas = [...atualizadas];
-
-    if (filtros.tipos && filtros.tipos.length > 0) {
-      filtradas = filtradas.filter((d) => filtros.tipos.includes(d.tipo));
-    }
-
-    if (filtros.bairros && filtros.bairros.length > 0) {
-      filtradas = filtradas.filter((d) =>
-        filtros.bairros.includes(d.localizacao)
-      );
-    }
-
-    setDenunciasFiltradas(filtradas);
+    // força recarregar tudo chamando a API novamente
+    window.location.reload();
   };
 
-  const exibindoOverlay = carregandoInicial || carregandoFiltro;
+  const exibindoOverlay =
+    denuncias.length === 0 && !carregandoFiltro ? true : carregandoFiltro;
 
   return (
     <div className="app-root">
@@ -171,7 +148,7 @@ function App() {
           <div className="overlay-box">
             <div className="spinner" />
             <p>
-              {carregandoInicial
+              {denuncias.length === 0
                 ? "Carregando denúncias..."
                 : "Aplicando filtros..."}
             </p>
